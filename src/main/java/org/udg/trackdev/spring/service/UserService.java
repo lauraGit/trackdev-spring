@@ -33,13 +33,7 @@ public class UserService {
         return userRepository;
     }
 
-    public void checkIfEmailExists(String email) {
-        if (userRepository.existsByEmail(email))
-            throw new ServiceException("User with this email already exist");
-    }
-
     public User matchPassword(String username, String password) {
-
         User user = userRepository.findByUsername(username);
 
         if (user == null) throw new ServiceException("User does not exists");
@@ -74,7 +68,15 @@ public class UserService {
         if (uo.isPresent())
             return uo.get();
         else
-            throw new ServiceException(String.format("User with id = %s dos not exists", id));
+            throw new ServiceException(String.format("User with id = %s does not exist", id));
+    }
+
+    public User getByEmail(String email) {
+        List<User> list = userRepository.findByEmail(email);
+        if(list.size() > 0)
+            return list.get(0);
+        else
+            return null;
     }
 
     @Transactional
@@ -92,10 +94,10 @@ public class UserService {
     }
 
     private void checkIfExists(String username, String email) {
-        checkIfEmailExists(email);
+        if (userRepository.existsByEmail(email))
+            throw new ServiceException("User with this email already exist");
 
         if (userRepository.existsByUsername(username))
             throw new ServiceException("Tname already exists");
     }
-
 }

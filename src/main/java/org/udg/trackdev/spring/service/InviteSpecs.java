@@ -16,4 +16,10 @@ public class InviteSpecs {
             return builder.equal(root.get("email"), email);
         };
     }
+
+    public static Specification<Invite> isPending() {
+        return (root, query, builder) -> {
+            return builder.equal(root.get("state"), InviteState.PENDING);
+        };
+    }
 }

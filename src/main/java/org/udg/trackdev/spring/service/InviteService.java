@@ -39,9 +39,8 @@ public class InviteService extends BaseService<Invite, InviteRepository> {
     public Invite createInvite(String email, Collection<UserType> userTypes, String ownerId) {
         User owner = userService.get(ownerId);
         checkIfCanInviteUserTypes(owner.getRoles(), userTypes);
-        userService.checkIfEmailExists(email);
-        checkIfExists(email, ownerId);
-
+        checkIfExistsOpenInvite(email, ownerId);
+        checkInviteeDoesNotHaveRoles(email, userTypes);
         Invite invite = new Invite(email);
         for (UserType type : userTypes) {
             Role role = roleService.get(type);
@@ -52,11 +51,28 @@ public class InviteService extends BaseService<Invite, InviteRepository> {
         return invite;
     }
 
-    private void checkIfExists(String email, String ownerId) {
-        List<Invite> invites = inviteRepository.findByEmail(email);
-        boolean alreadyInvited = invites.stream()
-                .anyMatch(i -> i.getOwnerId().equals(ownerId));
-        if(alreadyInvited) {
+    private void checkInviteeDoesNotHaveRoles(String email, Collection<UserType> invitationUserTypes) {
+        User invitee = userService.getByEmail(email);
+        if(invitee != null) {
+            Boolean containsAll = true;
+            for(UserType ut: invitationUserTypes) {
+                Boolean hasUt = invitee.getRoles().stream().anyMatch(role -> role.getUserType() == ut);
+                if(!hasUt) {
+                    containsAll = false;
+                    break;
+                }
+            }
+            if(containsAll)
+                throw new ServiceException("User already exists with this role");
+        }
+    }
+
+    private void checkIfExistsOpenInvite(String email, String ownerId) {
+        Specification<Invite> spec = InviteSpecs.isInvited(email)
+                .and(InviteSpecs.isOwnedBy(ownerId))
+                .and(InviteSpecs.isPending());
+        List<Invite> invites = repo.findAll(spec);
+        if(invites.size() > 0) {
             throw new ServiceException("Invitation for this email already exists");
         }
     }
