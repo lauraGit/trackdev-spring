@@ -98,7 +98,22 @@ public class InviteService extends BaseService<Invite, InviteRepository> {
         if(!invite.getOwnerId().equals(userId)) {
             throw new ServiceException("User cannot manage invite");
         }
+        if(invite.getState() != InviteState.PENDING) {
+            throw new ServiceException("Only pending invites can be deleted");
+        }
         repo.delete(invite);
     }
 
+    @Transactional
+    public void acceptInvite(Long inviteId, String userId) {
+        Invite invite = get(inviteId);
+        User user = userService.get(userId);
+        if(!user.getEmail().equals(invite.getEmail())) {
+            throw new ServiceException("User cannot accept an invite that is not for them");
+        }
+        for(Role inviteRole : invite.getRoles()) {
+            user.addRole(inviteRole);
+        }
+        invite.use();
+    }
 }
