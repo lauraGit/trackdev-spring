@@ -1,6 +1,7 @@
 package org.udg.trackdev.spring.service;
 
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Component;
 import org.udg.trackdev.spring.configuration.UserType;
 import org.udg.trackdev.spring.controller.exceptions.ServiceException;
 import org.udg.trackdev.spring.entity.Invite;
@@ -11,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+@Component
 public class InviteRoleBuilder extends InviteBuilder<Collection<UserType>> {
 
     private RoleService roleService;

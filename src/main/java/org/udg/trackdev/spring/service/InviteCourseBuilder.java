@@ -1,11 +1,13 @@
 package org.udg.trackdev.spring.service;
 
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Component;
 import org.udg.trackdev.spring.controller.exceptions.ServiceException;
 import org.udg.trackdev.spring.entity.CourseYear;
 import org.udg.trackdev.spring.entity.Invite;
 import org.udg.trackdev.spring.entity.User;
 
+@Component
 public class InviteCourseBuilder extends InviteBuilder<CourseYear> {
 
     private CourseService courseService;
