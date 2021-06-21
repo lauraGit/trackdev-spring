@@ -11,8 +11,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table( name = "invites",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"email","ownerId","courseYearId"} ))
+@Table( name = "invites")
 public class Invite extends BaseEntityLong {
 
     public Invite() {}
