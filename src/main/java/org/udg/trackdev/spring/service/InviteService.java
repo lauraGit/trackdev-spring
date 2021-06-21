@@ -57,7 +57,7 @@ public class InviteService extends BaseService<Invite, InviteRepository> {
         if(invitee != null) {
             Boolean containsAll = true;
             for(UserType ut: invitationUserTypes) {
-                Boolean hasUt = invitee.getRoles().stream().anyMatch(role -> role.getUserType() == ut);
+                Boolean hasUt = invitee.isUserType(ut);
                 if(!hasUt) {
                     containsAll = false;
                     break;

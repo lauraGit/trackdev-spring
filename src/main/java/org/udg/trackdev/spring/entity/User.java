@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import org.udg.trackdev.spring.configuration.UserType;
 import org.udg.trackdev.spring.serializer.JsonRolesSerializer;
 
 import javax.persistence.*;
@@ -82,6 +83,17 @@ public class User extends BaseEntityUUID {
 
   public void addRole(Role role) {
     roles.add(role);
+  }
+
+  public boolean isUserType(UserType userType) {
+    boolean inRole = false;
+    for(Role role: roles) {
+      if(role.getUserType() == userType) {
+        inRole = true;
+        break;
+      }
+    }
+    return inRole;
   }
 
   public Date getLastLogin() {
