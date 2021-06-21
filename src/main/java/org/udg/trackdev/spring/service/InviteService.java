@@ -6,10 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.udg.trackdev.spring.configuration.UserType;
 import org.udg.trackdev.spring.controller.exceptions.ServiceException;
-import org.udg.trackdev.spring.entity.Invite;
-import org.udg.trackdev.spring.entity.InviteState;
-import org.udg.trackdev.spring.entity.Role;
-import org.udg.trackdev.spring.entity.User;
+import org.udg.trackdev.spring.entity.*;
 import org.udg.trackdev.spring.repository.InviteRepository;
 
 import java.util.ArrayList;
@@ -25,13 +22,17 @@ public class InviteService extends BaseService<Invite, InviteRepository> {
     @Autowired
     UserService userService;
 
-    public List<Invite> searchCreated(String userId) {
-        return super.search(InviteSpecs.isOwnedBy(userId));
+    public List<Invite> searchCreated(String userId, Specification<Invite> specification) {
+        return super.search(InviteSpecs.isOwnedBy(userId).and(specification));
     }
 
-    public List<Invite> searchInvited(String userId) {
+    public List<Invite> searchInvited(String userId, Specification<Invite> specification) {
         User user = userService.get(userId);
         String email = user.getEmail();
+        return super.search(InviteSpecs.isInvited(email).and(specification));
+    }
+
+    public List<Invite> searchByEmail(String email) {
         return super.search(InviteSpecs.isInvited(email));
     }
 
@@ -70,7 +71,8 @@ public class InviteService extends BaseService<Invite, InviteRepository> {
     private void checkIfExistsOpenInvite(String email, String ownerId) {
         Specification<Invite> spec = InviteSpecs.isInvited(email)
                 .and(InviteSpecs.isOwnedBy(ownerId))
-                .and(InviteSpecs.isPending());
+                .and(InviteSpecs.isPending())
+                .and(InviteSpecs.notForCourseYear());
         List<Invite> invites = repo.findAll(spec);
         if(invites.size() > 0) {
             throw new ServiceException("Invitation for this email already exists");
@@ -125,11 +127,22 @@ public class InviteService extends BaseService<Invite, InviteRepository> {
     public void acceptInvite(Long inviteId, String userId) {
         Invite invite = get(inviteId);
         User user = userService.get(userId);
+        useInvite(invite, user);
+    }
+
+    @Transactional
+    public void useInvite(Invite invite, User user) {
         if(!user.getEmail().equals(invite.getEmail())) {
             throw new ServiceException("User cannot accept an invite that is not for them");
         }
+        if(invite.getState() != InviteState.PENDING) {
+            throw new ServiceException("Invite cannot be used");
+        }
         for(Role inviteRole : invite.getRoles()) {
             user.addRole(inviteRole);
+        }
+        if(invite.getCourseYear() != null) {
+            user.addToCourse(invite.getCourseYear());
         }
         invite.use();
     }

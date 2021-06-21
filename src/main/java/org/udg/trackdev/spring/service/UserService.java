@@ -24,7 +24,7 @@ public class UserService {
     private RoleService roleService;
 
     @Autowired
-    private InviteRepository inviteRepository;
+    private InviteService inviteService;
 
     @Autowired
     Global global;
@@ -48,16 +48,12 @@ public class UserService {
     public User register(String username, String email, String password) {
         checkIfExists(username, email);
 
-        List<Invite> invites = inviteRepository.findByEmail(email);
-
+        List<Invite> invites = inviteService.searchByEmail(email);
         if (invites.size() == 0) throw new ServiceException("This email does not have any invite");
 
         User user = new User(username, email, global.getPasswordEncoder().encode(password));
         for (Invite invite: invites) {
-            for(Role inviteRole : invite.getRoles()) {
-                user.addRole(inviteRole);
-            }
-            invite.use();
+            inviteService.useInvite(invite, user);
         }
         userRepository.save(user);
         return user;

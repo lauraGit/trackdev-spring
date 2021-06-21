@@ -22,4 +22,16 @@ public class InviteSpecs {
             return builder.equal(root.get("state"), InviteState.PENDING);
         };
     }
+
+    public static Specification<Invite> notForCourseYear() {
+        return (root, query, builder) -> {
+            return builder.isNull(root.get("courseYearId"));
+        };
+    }
+
+    public static Specification<Invite> forCourseYear(Long yearId) {
+        return (root, query, builder) -> {
+            return builder.equal(root.get("courseYearId"), yearId);
+        };
+    }
 }

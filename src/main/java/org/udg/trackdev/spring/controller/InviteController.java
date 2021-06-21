@@ -1,6 +1,7 @@
 package org.udg.trackdev.spring.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.udg.trackdev.spring.configuration.UserType;
@@ -8,6 +9,7 @@ import org.udg.trackdev.spring.entity.IdObjectLong;
 import org.udg.trackdev.spring.entity.Invite;
 import org.udg.trackdev.spring.entity.User;
 import org.udg.trackdev.spring.service.InviteService;
+import org.udg.trackdev.spring.service.InviteSpecs;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Email;
@@ -28,7 +30,8 @@ public class InviteController extends BaseController {
     @GetMapping(path = "/invites")
     public List<Invite> getInvites(Principal principal) {
         String userId = super.getUserId(principal);
-        List<Invite> invites = service.searchCreated(userId);
+        Specification<Invite> specification = InviteSpecs.isPending();
+        List<Invite> invites = service.searchCreated(userId, specification);
         return invites;
     }
 
@@ -49,7 +52,8 @@ public class InviteController extends BaseController {
     @GetMapping(path = "/users/self/invites")
     public List<Invite> getSelfInvites(Principal principal) {
         String userId = super.getUserId(principal);
-        List<Invite> invites = service.searchInvited(userId);
+        Specification<Invite> specification = InviteSpecs.isPending();
+        List<Invite> invites = service.searchInvited(userId, specification);
         return invites;
     }
 

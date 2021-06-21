@@ -47,6 +47,9 @@ public class User extends BaseEntityUUID {
   @ManyToMany
   private Collection<Group> groups = new ArrayList<>();
 
+  @ManyToMany
+  private Collection<CourseYear> courseYears = new ArrayList<>();
+
   @ManyToMany()
   private Set<Role> roles = new HashSet<>();
 
@@ -95,5 +98,9 @@ public class User extends BaseEntityUUID {
     this.groups.add(group);
   }
 
+  public void addToCourse(CourseYear courseYear) { this.courseYears.add(courseYear); }
+
   public void addInvite(Invite invite) { this.invites.add(invite); }
+
+  public Collection<CourseYear> getCourseYears() { return this.courseYears; }
 }
