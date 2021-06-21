@@ -28,9 +28,11 @@ public class InviteController extends BaseController {
     InviteService service;
 
     @GetMapping(path = "/invites")
-    public List<Invite> getInvites(Principal principal) {
+    public List<Invite> getInvites(Principal principal,
+                               @RequestParam(name = "type", required = false) String type,
+                               @RequestParam(name = "courseYearId", required = false) Long yearId) {
         String userId = super.getUserId(principal);
-        Specification<Invite> specification = InviteSpecs.isPending();
+        Specification<Invite> specification = buildSpecification(type, yearId);
         List<Invite> invites = service.searchCreated(userId, specification);
         return invites;
     }
@@ -50,9 +52,11 @@ public class InviteController extends BaseController {
     }
 
     @GetMapping(path = "/users/self/invites")
-    public List<Invite> getSelfInvites(Principal principal) {
+    public List<Invite> getSelfInvites(Principal principal,
+                               @RequestParam(name = "type", required = false) String type,
+                               @RequestParam(name = "courseYearId", required = false) Long yearId) {
         String userId = super.getUserId(principal);
-        Specification<Invite> specification = InviteSpecs.isPending();
+        Specification<Invite> specification = buildSpecification(type, yearId);
         List<Invite> invites = service.searchInvited(userId, specification);
         return invites;
     }
