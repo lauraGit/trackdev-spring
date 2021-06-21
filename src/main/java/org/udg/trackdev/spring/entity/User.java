@@ -110,7 +110,7 @@ public class User extends BaseEntityUUID {
     this.groups.add(group);
   }
 
-  public void addToCourse(CourseYear courseYear) { this.courseYears.add(courseYear); }
+  public void enrollToCourseYear(CourseYear courseYear) { this.courseYears.add(courseYear); }
 
   public void addInvite(Invite invite) { this.invites.add(invite); }
 

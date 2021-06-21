@@ -142,7 +142,7 @@ public class InviteService extends BaseService<Invite, InviteRepository> {
             user.addRole(inviteRole);
         }
         if(invite.getCourseYear() != null) {
-            user.addToCourse(invite.getCourseYear());
+            user.enrollToCourseYear(invite.getCourseYear());
         }
         invite.use();
     }
