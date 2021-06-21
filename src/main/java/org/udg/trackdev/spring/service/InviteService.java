@@ -9,10 +9,8 @@ import org.udg.trackdev.spring.controller.exceptions.ServiceException;
 import org.udg.trackdev.spring.entity.*;
 import org.udg.trackdev.spring.repository.InviteRepository;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 @Service
 public class InviteService extends BaseService<Invite, InviteRepository> {
@@ -21,6 +19,9 @@ public class InviteService extends BaseService<Invite, InviteRepository> {
 
     @Autowired
     UserService userService;
+
+    @Autowired
+    InviteRoleBuilder roleInviteBuilder;
 
     public List<Invite> searchCreated(String userId, Specification<Invite> specification) {
         return super.search(InviteSpecs.isOwnedBy(userId).and(specification));
@@ -38,77 +39,8 @@ public class InviteService extends BaseService<Invite, InviteRepository> {
 
     @Transactional
     public Invite createInvite(String email, Collection<UserType> userTypes, String ownerId) {
-        User owner = userService.get(ownerId);
-        checkIfCanInviteUserTypes(owner.getRoles(), userTypes);
-        checkIfExistsOpenInvite(email, ownerId);
-        checkInviteeDoesNotHaveRoles(email, userTypes);
-        Invite invite = new Invite(email);
-        for (UserType type : userTypes) {
-            Role role = roleService.get(type);
-            invite.addRole(role);
-        }
-        owner.addInvite(invite);
-        invite.setOwner(owner);
+        Invite invite = roleInviteBuilder.Build(email, ownerId, userTypes);
         return invite;
-    }
-
-    private void checkInviteeDoesNotHaveRoles(String email, Collection<UserType> invitationUserTypes) {
-        User invitee = userService.getByEmail(email);
-        if(invitee != null) {
-            Boolean containsAll = true;
-            for(UserType ut: invitationUserTypes) {
-                Boolean hasUt = invitee.isUserType(ut);
-                if(!hasUt) {
-                    containsAll = false;
-                    break;
-                }
-            }
-            if(containsAll)
-                throw new ServiceException("User already exists with this role");
-        }
-    }
-
-    private void checkIfExistsOpenInvite(String email, String ownerId) {
-        Specification<Invite> spec = InviteSpecs.isInvited(email)
-                .and(InviteSpecs.isOwnedBy(ownerId))
-                .and(InviteSpecs.isPending())
-                .and(InviteSpecs.notForCourseYear());
-        List<Invite> invites = repo.findAll(spec);
-        if(invites.size() > 0) {
-            throw new ServiceException("Invitation for this email already exists");
-        }
-    }
-
-    private void checkIfCanInviteUserTypes(Set<Role> ownerRoles, Collection<UserType> invitationUserTypes) {
-        boolean canInvite = false;
-        for (Role ownerRole : ownerRoles) {
-            canInvite = invitationUserTypes.stream()
-                    .allMatch(iUT -> canInviteRole(ownerRole.getUserType(), iUT));
-            if(canInvite) {
-                break;
-            }
-        }
-        if(!canInvite) {
-            throw new ServiceException("User is not allowed to create an invitation for this role");
-        }
-    }
-
-    private boolean canInviteRole(UserType ownerType, UserType invitationRole) {
-        List<UserType> allowedRoles = new ArrayList<UserType>();
-        switch (ownerType) {
-            case ADMIN:
-                allowedRoles.add(UserType.ADMIN);
-                allowedRoles.add(UserType.PROFESSOR);
-                break;
-            case PROFESSOR:
-                allowedRoles.add(UserType.PROFESSOR);
-                allowedRoles.add(UserType.STUDENT);
-                break;
-            case STUDENT:
-                break;
-        }
-        boolean canInvite = allowedRoles.stream().anyMatch(s -> s == invitationRole);
-        return canInvite;
     }
 
     @Transactional
