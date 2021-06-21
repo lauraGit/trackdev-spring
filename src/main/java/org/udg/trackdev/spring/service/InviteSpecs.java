@@ -29,6 +29,12 @@ public class InviteSpecs {
         };
     }
 
+    public static Specification<Invite> forCourseYear() {
+        return (root, query, builder) -> {
+            return builder.isNotNull(root.get("courseYearId"));
+        };
+    }
+
     public static Specification<Invite> forCourseYear(Long yearId) {
         return (root, query, builder) -> {
             return builder.equal(root.get("courseYearId"), yearId);

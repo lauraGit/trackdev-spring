@@ -64,6 +64,21 @@ public class InviteController extends BaseController {
         return okNoContent();
     }
 
+    private Specification<Invite> buildSpecification(String type, Long yearId) {
+        Specification<Invite> spec = Specification.where(null);
+        switch (type) {
+            case "application":
+                spec = spec.and(InviteSpecs.notForCourseYear());
+                break;
+            case "courseYear":
+                spec = spec.and(InviteSpecs.forCourseYear());
+        }
+        if(yearId != null) {
+            spec = spec.and(InviteSpecs.forCourseYear(yearId));
+        }
+        return spec;
+    }
+
     static class NewInvite {
         @NotNull
         @Email
