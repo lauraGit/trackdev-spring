@@ -4,12 +4,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.udg.trackdev.spring.configuration.UserType;
 import org.udg.trackdev.spring.controller.exceptions.ServiceException;
 import org.udg.trackdev.spring.entity.*;
-import org.udg.trackdev.spring.repository.BaseRepositoryLong;
 import org.udg.trackdev.spring.repository.CourseYearRepository;
-import org.udg.trackdev.spring.repository.InviteRepository;
 
 import java.util.List;
 
