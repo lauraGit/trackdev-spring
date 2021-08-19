@@ -6,9 +6,7 @@ import org.udg.trackdev.spring.entity.Task;
 import org.udg.trackdev.spring.entity.User;
 import org.udg.trackdev.spring.entity.views.EntityLevelViews;
 
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 
 @Entity
 @DiscriminatorValue(value = TaskActiveSprintChange.CHANGE_TYPE_NAME)
@@ -23,6 +21,11 @@ public class TaskActiveSprintChange extends TaskChange {
     }
 
     @ManyToOne
+    @JoinColumn(
+        name = "activeSprintId",
+        foreignKey = @ForeignKey(
+            name= "active_sprint_foreign_key_cascade",
+            foreignKeyDefinition = "FOREIGN KEY (`activeSprintId`) REFERENCES `sprints` (`id`) ON DELETE SET NULL"))
     private Sprint activeSprint;
 
     @Override

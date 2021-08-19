@@ -10,6 +10,13 @@ import javax.persistence.*;
 @Table(name = "task_changes")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "type")
+@AssociationOverride(
+    name="entity",
+    joinColumns = @JoinColumn(name = "entityId"),
+    foreignKey = @ForeignKey(
+        name="task_foreign_key_cascade",
+        foreignKeyDefinition = "FOREIGN KEY (`entityId`) REFERENCES `tasks` (`id`) ON DELETE CASCADE")
+)
 public abstract class TaskChange extends EntityLogChange<Task> {
 
     public TaskChange() { }
